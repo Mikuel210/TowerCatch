@@ -6,24 +6,29 @@ public class ShipController : MonoBehaviour
     [Header("Physics")]
     [SerializeField] private float gravityConstant;
     [SerializeField] private float areaRatio = 7;
-    [SerializeField] private float terminalVelocityMultiplier;
+    [SerializeField] private float verticalDrag;
+    [SerializeField] private float horizontalDrag;
     
     [Header("Rotation")]
     [SerializeField] private float minTorque;
     [SerializeField] private float maxTorque;
+    [SerializeField] private float torqueDrag;
     
     [Header("Thrust")]
     [SerializeField] private float thrustMultiplier;
-    [SerializeField] private float horizontalThrustDivider;
-    
     [SerializeField, Space] private float deltaThrottle;
     [SerializeField, Range(0, 1)] private float throttle;
     [SerializeField, Range(0, 1)] private float minThrottle;
+    
+    [Header("Fuel")]
+    [SerializeField] private float startingFuel;
+    [SerializeField] private float fuel;
     
     private Rigidbody2D _rigidbody;
     
     void Awake()
     {
+        fuel = startingFuel;
         _rigidbody = GetComponent<Rigidbody2D>();
     }
 
@@ -32,20 +37,11 @@ public class ShipController : MonoBehaviour
         UpdateGravity();
         UpdateRotation();
         UpdateThrottle();
-        UpdateThrust();
-        UpdateDrag();
+        UpdateThrustAndDrag();
+        UpdateFuel();
     }
 
-    private void UpdateGravity()
-    {
-        float cosine = Mathf.Cos(transform.eulerAngles.z * Mathf.Deg2Rad);
-        float terminalVelocity = Map(Mathf.Abs(cosine), 0, 1, 1, areaRatio);
-        terminalVelocity *= -terminalVelocityMultiplier;
-
-        float currentVelocity = _rigidbody.linearVelocityY;
-        float correction = (terminalVelocity - currentVelocity) * gravityConstant;
-        _rigidbody.AddForce(Vector3.up * correction);
-    }
+    private void UpdateGravity() => _rigidbody.AddForce(Vector3.down * gravityConstant);
 
     private void UpdateRotation()
     {
@@ -60,19 +56,27 @@ public class ShipController : MonoBehaviour
         throttle = Mathf.Clamp01(throttle + input * deltaThrottle);
     }
 
-    private void UpdateThrust()
+    private void UpdateThrustAndDrag()
     {
         float thrustPercentage = Map(throttle, 0, 1, minThrottle, 1);
         float thrust = throttle == 0 ? 0 : thrustPercentage * thrustMultiplier;
-
-        Vector2 force = -transform.up * thrust;
-        force = new Vector2(force.x / horizontalThrustDivider, force.y);
-        _rigidbody.AddForce(force);
+        Vector2 thrustForce = -transform.up * thrust;
+        
+        float sine = Mathf.Sin(transform.eulerAngles.z * Mathf.Deg2Rad);
+        float area = Map(Mathf.Abs(sine), 0, 1, 1, areaRatio);
+        
+        Vector2 dragForce = new(-_rigidbody.linearVelocityX * horizontalDrag, 
+                                -_rigidbody.linearVelocityY * verticalDrag * area);
+        
+        _rigidbody.AddForce(new Vector2(thrustForce.x + dragForce.x, Mathf.Max(thrustForce.y, dragForce.y)));
+        
+        // Torque drag
+        _rigidbody.totalTorque *= torqueDrag;
     }
 
-    private void UpdateDrag()
+    private void UpdateFuel()
     {
-        // TODO Horizontal air drag
+        fuel -= throttle;
     }
 
     private float Map(float x, float inputMin, float inputMax, float outputMin, float outputMax)
