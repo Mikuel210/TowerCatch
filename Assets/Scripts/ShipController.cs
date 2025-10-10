@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class ShipController : MonoBehaviour
+public class ShipController : Singleton<ShipController>
 {
     [Header("Physics")]
     [SerializeField] private float gravityConstant;
@@ -10,12 +11,17 @@ public class ShipController : MonoBehaviour
     [SerializeField] private float verticalDrag;
     [SerializeField] private float horizontalDrag;
     [SerializeField] private float slidingFactor;
+    [SerializeField, Range(0, 1)] private float dryMass = 0.79f;
+    
+    [SerializeField, Space] private float rudForce;
+    [SerializeField] private ParticleSystem rudParticles;
     
     [Header("Rotation")]
     [SerializeField] private float minTorque;
     [SerializeField] private float maxTorque;
     
     [Header("Thrust")]
+    [SerializeField] private bool enginesRunning = true;
     [SerializeField] private float thrustMultiplier;
     [SerializeField] private float gimbalThrustDivider = 1;
     [SerializeField] private float horizontalThrustDivider = 1;
@@ -23,10 +29,12 @@ public class ShipController : MonoBehaviour
     [SerializeField, Space] private float deltaThrottle;
     [SerializeField, Range(0, 1)] private float throttle;
     [SerializeField, Range(0, 1)] private float minThrottle;
+    public event Action<float> OnThrottleChanged;
     
     [Header("Fuel")]
     [SerializeField] private float startingFuel;
-    [SerializeField] private float fuel;
+    [field: SerializeField] public float Fuel { get; private set; }
+    public event Action<float> OnFuelChanged;
 
     [Header("Engines")] 
     [SerializeField] private float maxParticleSpeed;
@@ -34,20 +42,25 @@ public class ShipController : MonoBehaviour
     [SerializeField] private float engineGimbal;
     [SerializeField] private float maxEngineGimbal;
     [SerializeField, Range(0, 1)] private float gimbalSmoothing;
-    [SerializeField] private List<ParticleSystem> engines;
     
+    [SerializeField, Space] private List<ParticleSystem> engines;
+    [SerializeField] private GameObject engineShutdownPrefab;
+    
+    // Private fields
     private Rigidbody2D _rigidbody;
     private Animator _animator;
+    private float previousThrottle = 1;
     
     void Awake()
     {
-        fuel = startingFuel;
+        Fuel = startingFuel;
         _rigidbody = GetComponent<Rigidbody2D>();
         _animator = GetComponentInChildren<Animator>();
     }
 
-    void FixedUpdate()
+    void FixedUpdate() 
     {
+        UpdateMass();
         UpdateGravity();
         UpdateRotation();
         UpdateThrottle();
@@ -56,6 +69,8 @@ public class ShipController : MonoBehaviour
         UpdateFuel();
         UpdateEngineVisuals();
     }
+
+    private void UpdateMass() => _rigidbody.mass = Map(Fuel, 0, startingFuel, dryMass, 1);
 
     private void UpdateGravity() => _rigidbody.AddForce(Vector3.down * gravityConstant);
 
@@ -71,23 +86,28 @@ public class ShipController : MonoBehaviour
         _animator.SetInteger("Input", (int)Input.GetAxisRaw("Horizontal"));
     }
 
-    private void UpdateThrottle()
-    {
+    private void UpdateThrottle() {
         float input = Input.GetAxisRaw("Vertical");
         throttle = Mathf.Clamp01(throttle + input * deltaThrottle);
+
+        if (input != 0) OnThrottleChanged?.Invoke(throttle);
     }
 
     private void UpdateThrustAndDrag()
     {
-        float thrustPercentage = Map(throttle, 0, 1, minThrottle, 1);
-        float thrust = throttle == 0 ? 0 : thrustPercentage * thrustMultiplier;
-        
-        Vector2 thrustForce = -transform.up * thrust;
-        thrustForce = new(thrustForce.x / horizontalThrustDivider, thrustForce.y);
+        Vector2 thrustForce = Vector2.zero;
 
-        float divider = gimbalThrustDivider * Mathf.Abs(Input.GetAxis("Horizontal"));
-        divider = Map(divider, 0, gimbalThrustDivider, 1, gimbalThrustDivider);
-        thrustForce /= divider;
+        if (enginesRunning) {
+            float thrustPercentage = Map(throttle, 0, 1, minThrottle, 1);
+            float thrust = throttle == 0 ? 0 : thrustPercentage * thrustMultiplier;
+        
+            thrustForce = -transform.up * thrust;
+            thrustForce = new(thrustForce.x / horizontalThrustDivider, thrustForce.y);
+            
+            float divider = gimbalThrustDivider * Mathf.Abs(Input.GetAxis("Horizontal"));
+            divider = Map(divider, 0, gimbalThrustDivider, 1, gimbalThrustDivider);
+            thrustForce /= divider;
+        }
         
         float sine = Mathf.Sin(transform.eulerAngles.z * Mathf.Deg2Rad);
         float area = Map(Mathf.Abs(sine), 0, 1, 1, areaRatio);
@@ -95,7 +115,7 @@ public class ShipController : MonoBehaviour
         Vector2 dragForce = new(-_rigidbody.linearVelocityX * horizontalDrag, 
                                 -_rigidbody.linearVelocityY * verticalDrag * area);
         
-        _rigidbody.AddForce(new Vector2(thrustForce.x + dragForce.x, Mathf.Max(thrustForce.y, dragForce.y)));
+        _rigidbody.AddForce(new(thrustForce.x + dragForce.x, Mathf.Max(thrustForce.y, dragForce.y)));
     }
 
     private void UpdateSliding()
@@ -106,7 +126,11 @@ public class ShipController : MonoBehaviour
 
     private void UpdateFuel()
     {
-        fuel -= throttle;
+        Fuel = Mathf.Max(Fuel - throttle, 0);
+        if (Fuel == 0) enginesRunning = false;
+
+        if (throttle == 0) return;
+        OnFuelChanged?.Invoke(Fuel);
     }
 
     private void UpdateEngineVisuals()
@@ -117,15 +141,15 @@ public class ShipController : MonoBehaviour
 
     private void UpdateEngineThrottle()
     {
-        if (throttle == 0)
+        if (throttle == 0 || !enginesRunning)
         {
             foreach (ParticleSystem engine in engines)
             {
                 if (!engine.isStopped)
-                    engine.Stop();
+                    StopEngine(engine, previousThrottle > 0);
             }
-                
-            return;
+            
+            goto End;
         }
 
         float engineStep = 1 / (float)engines.Count;
@@ -141,7 +165,7 @@ public class ShipController : MonoBehaviour
             
             if (!state && engine.isPlaying)
             {
-                engine.Stop();
+                StopEngine(engine, previousThrottle > threshold);
                 continue;
             }
 
@@ -149,8 +173,26 @@ public class ShipController : MonoBehaviour
             engineThrottle = Mathf.Clamp01(engineThrottle);
 
             var mainModule = engine.main;
-            mainModule.startSpeedMultiplier = maxParticleSpeed * thrustMultiplier;
+            mainModule.startSpeedMultiplier = maxParticleSpeed * engineThrottle;
         }
+
+        End:
+        previousThrottle = throttle;
+        if (!enginesRunning) previousThrottle = 0;
+    }
+
+    private void StopEngine(ParticleSystem engine, bool showParticles)
+    {
+        engine.Stop();
+                
+        // Particle effect
+        if (!showParticles) return;
+                
+        var particles = Instantiate(engineShutdownPrefab, transform);
+        particles.transform.localPosition = new(0, 0.5f, 0);
+        particles.transform.parent = null;
+        particles.transform.localScale = new(1, 1, 1);
+        Destroy(particles, 3f);
     }
 
     private void UpdateEngineGimbal()
@@ -172,6 +214,22 @@ public class ShipController : MonoBehaviour
             engineAngle = Mathf.LerpAngle(engine.localEulerAngles.z, engineAngle, gimbalSmoothing);
             engine.localEulerAngles = new(0, 0, engineAngle);
         }
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.relativeVelocity.magnitude >= rudForce)
+            RapidlyDisassemble();
+    }
+
+    private void RapidlyDisassemble() {
+        // Particles
+        var particles = Instantiate(rudParticles);
+        particles.transform.position = transform.position;
+        Destroy(particles, 10f);
+        
+        // Disable ship
+        gameObject.SetActive(false);
     }
 
     private float Map(float x, float inputMin, float inputMax, float outputMin, float outputMax)
