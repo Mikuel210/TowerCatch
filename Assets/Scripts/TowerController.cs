@@ -17,17 +17,18 @@ public class TowerController : MonoBehaviour
 
     private Transform _ship;
     private bool _delugeEnabled;
-    
-    void Start() => _ship = ShipController.Instance.transform;
+
+    void Start()
+    {
+        _ship = ShipController.Instance.transform;
+        CatchPin.Instance.OnCatch += () => transform.Find("OLM").GetComponent<ParticleSystem>().Stop();
+    }
     
     void Update()
     {
         float distance = Vector2.Distance(_ship.position, _chopsticks.position);
         float scale = MapClamp(distance, inMin, inMax, outMin, outMax);
         _chopstickParent.localScale = new(Mathf.Max(scale, _chopstickParent.localScale.x), 1);
-        
-        if (_delugeEnabled && !ShipController.Instance.EnginesRunning)
-            olm.Stop();
         
         if (distance > delugeDistance || _delugeEnabled) return;
 
@@ -42,4 +43,5 @@ public class TowerController : MonoBehaviour
         if (outputMin < outputMax) return Mathf.Clamp(mapping, outputMin, outputMax);
         return Mathf.Clamp(mapping, outputMax, outputMin);
     }
+    
 }
