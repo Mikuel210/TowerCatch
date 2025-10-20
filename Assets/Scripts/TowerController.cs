@@ -10,8 +10,13 @@ public class TowerController : MonoBehaviour
     [SerializeField] private float inMax;
     [SerializeField] private float outMin;
     [SerializeField] private float outMax;
+    
+    [Header("OLM")]
+    [SerializeField] private ParticleSystem olm;
+    [SerializeField] private float delugeDistance;
 
     private Transform _ship;
+    private bool _delugeEnabled;
     
     void Start() => _ship = ShipController.Instance.transform;
     
@@ -20,6 +25,11 @@ public class TowerController : MonoBehaviour
         float distance = Vector2.Distance(_ship.position, _chopsticks.position);
         float scale = MapClamp(distance, inMin, inMax, outMin, outMax);
         _chopstickParent.localScale = new(Mathf.Max(scale, _chopstickParent.localScale.x), 1);
+        
+        if (distance > delugeDistance || _delugeEnabled) return;
+
+        _delugeEnabled = true;
+        olm.Play();
     }
 
     private float MapClamp(float x, float inputMin, float inputMax, float outputMin, float outputMax)

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 public class ShipController : Singleton<ShipController>
 {
@@ -21,14 +22,14 @@ public class ShipController : Singleton<ShipController>
     [SerializeField] private float maxTorque;
     
     [Header("Thrust")]
-    [SerializeField] private bool enginesRunning = true;
+    [SerializeField] private bool enginesRunning;
     [SerializeField] private float thrustMultiplier;
     [SerializeField] private float gimbalThrustDivider = 1;
     [SerializeField] private float horizontalThrustDivider = 1;
     
-    [SerializeField, Space] private float deltaThrottle;
-    [SerializeField, Range(0, 1)] private float throttle;
+    [field: SerializeField, Range(0, 1), Space] public float Throttle { get; private set; } = 1;
     [SerializeField, Range(0, 1)] private float minThrottle;
+    [SerializeField] private float deltaThrottle;
     public event Action<float> OnThrottleChanged;
     
     [Header("Fuel")]
@@ -44,7 +45,8 @@ public class ShipController : Singleton<ShipController>
     [SerializeField, Range(0, 1)] private float gimbalSmoothing;
     
     [SerializeField, Space] private List<ParticleSystem> engines;
-    [SerializeField] private GameObject engineShutdownPrefab;
+    [SerializeField] private List<Image> engineGraphics;
+    [SerializeField] private GameObject engineShutdownParticles;
     
     // Private fields
     private Rigidbody2D _rigidbody;
@@ -56,6 +58,12 @@ public class ShipController : Singleton<ShipController>
         Fuel = startingFuel;
         _rigidbody = GetComponent<Rigidbody2D>();
         _animator = GetComponentInChildren<Animator>();
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space)) 
+            enginesRunning = !enginesRunning;
     }
 
     void FixedUpdate() 
@@ -77,8 +85,9 @@ public class ShipController : Singleton<ShipController>
     private void UpdateRotation()
     {
         float input = Input.GetAxis("Horizontal");
-        float thrustPercentage = Map(throttle, 0, 1, minThrottle, 1);
+        float thrustPercentage = Map(Throttle, 0, 1, minThrottle, 1);
         thrustPercentage = Mathf.Approximately(thrustPercentage, minThrottle) ? 0 : thrustPercentage;
+        thrustPercentage = enginesRunning ? thrustPercentage : 0;
         
         float multiplier = Map(thrustPercentage, 0, 1, minTorque, maxTorque);
         _rigidbody.AddTorque(-input * multiplier);
@@ -88,9 +97,9 @@ public class ShipController : Singleton<ShipController>
 
     private void UpdateThrottle() {
         float input = Input.GetAxisRaw("Vertical");
-        throttle = Mathf.Clamp01(throttle + input * deltaThrottle);
+        Throttle = Mathf.Clamp01(Throttle + input * deltaThrottle);
 
-        if (input != 0) OnThrottleChanged?.Invoke(throttle);
+        if (input != 0) OnThrottleChanged?.Invoke(Throttle);
     }
 
     private void UpdateThrustAndDrag()
@@ -98,8 +107,8 @@ public class ShipController : Singleton<ShipController>
         Vector2 thrustForce = Vector2.zero;
 
         if (enginesRunning) {
-            float thrustPercentage = Map(throttle, 0, 1, minThrottle, 1);
-            float thrust = throttle == 0 ? 0 : thrustPercentage * thrustMultiplier;
+            float thrustPercentage = Map(Throttle, 0, 1, minThrottle, 1);
+            float thrust = Throttle == 0 ? 0 : thrustPercentage * thrustMultiplier;
         
             thrustForce = -transform.up * thrust;
             thrustForce = new(thrustForce.x / horizontalThrustDivider, thrustForce.y);
@@ -126,10 +135,11 @@ public class ShipController : Singleton<ShipController>
 
     private void UpdateFuel()
     {
+        float throttle = enginesRunning ? Throttle : 0;
         Fuel = Mathf.Max(Fuel - throttle, 0);
         if (Fuel == 0) enginesRunning = false;
 
-        if (throttle == 0) return;
+        if (Throttle == 0) return;
         OnFuelChanged?.Invoke(Fuel);
     }
 
@@ -141,7 +151,7 @@ public class ShipController : Singleton<ShipController>
 
     private void UpdateEngineThrottle()
     {
-        if (throttle == 0 || !enginesRunning)
+        if (Throttle == 0 || !enginesRunning)
         {
             foreach (ParticleSystem engine in engines)
             {
@@ -158,10 +168,14 @@ public class ShipController : Singleton<ShipController>
         {
             ParticleSystem engine = engines[i];
             float threshold = engineStep * i;
-            bool state = throttle >= threshold; 
-            
-            if (state && engine.isStopped)
+            bool state = Throttle >= threshold;
+
+            if (state && engine.isStopped) {
                 engine.Play();
+                
+                // Show graphic
+                engineGraphics[i].gameObject.SetActive(true);
+            }
             
             if (!state && engine.isPlaying)
             {
@@ -169,7 +183,7 @@ public class ShipController : Singleton<ShipController>
                 continue;
             }
 
-            float engineThrottle = Map(throttle, threshold, threshold + engineStep, minThrottle, 1);
+            float engineThrottle = Map(Throttle, threshold, threshold + engineStep, minThrottle, 1);
             engineThrottle = Mathf.Clamp01(engineThrottle);
 
             var mainModule = engine.main;
@@ -177,18 +191,22 @@ public class ShipController : Singleton<ShipController>
         }
 
         End:
-        previousThrottle = throttle;
+        previousThrottle = Throttle;
         if (!enginesRunning) previousThrottle = 0;
     }
 
     private void StopEngine(ParticleSystem engine, bool showParticles)
     {
         engine.Stop();
+        
+        // Hide graphic
+        int engineNumber = engines.IndexOf(engine);
+        engineGraphics[engineNumber].gameObject.SetActive(false);
                 
         // Particle effect
         if (!showParticles) return;
                 
-        var particles = Instantiate(engineShutdownPrefab, transform);
+        var particles = Instantiate(engineShutdownParticles, transform);
         particles.transform.localPosition = new(0, 0.5f, 0);
         particles.transform.parent = null;
         particles.transform.localScale = new(1, 1, 1);
@@ -198,9 +216,9 @@ public class ShipController : Singleton<ShipController>
     private void UpdateEngineGimbal()
     {
         float engineStep = 1 / (float)engines.Count;
-        float dispersion = engineStep - throttle % engineStep;
+        float dispersion = engineStep - Throttle % engineStep;
         dispersion = Map(dispersion, 0, engineStep, 0, engineDispersion);
-        dispersion = throttle < engineStep ? 0 : dispersion;
+        dispersion = Throttle < engineStep ? 0 : dispersion;
 
         float input = Input.GetAxisRaw("Horizontal");
         float angle = input * engineGimbal;
@@ -227,6 +245,10 @@ public class ShipController : Singleton<ShipController>
         var particles = Instantiate(rudParticles);
         particles.transform.position = transform.position;
         Destroy(particles, 10f);
+        
+        // Engine graphics
+        foreach (var graphic in engineGraphics)
+            graphic.gameObject.SetActive(false);
         
         // Disable ship
         gameObject.SetActive(false);

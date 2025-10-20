@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,11 +9,30 @@ public class UIManager : MonoBehaviour {
 	[SerializeField] private Slider fuelSlider;
 	[SerializeField] private float maxFuel = 1000;
 
-	private void Start()
+	[SerializeField, Space] private TextMeshProUGUI altitudeText;
+	[SerializeField] private TextMeshProUGUI velocityText;
+
+	private ShipController _ship;
+	private Rigidbody2D _shipRigidbody;
+
+	void Start()
 	{
-		ShipController.Instance.OnThrottleChanged += UpdateThrottle;
-		ShipController.Instance.OnFuelChanged += UpdateFuel;
+		_ship = ShipController.Instance;
+		_shipRigidbody = _ship.GetComponent<Rigidbody2D>();
+		
+		_ship.OnThrottleChanged += UpdateThrottle;
+		_ship.OnFuelChanged += UpdateFuel;
+		
+		UpdateThrottle(ShipController.Instance.Throttle);
 		UpdateFuel(ShipController.Instance.Fuel);
+	}
+
+	private const float UNITS_RATIO = 13;
+	
+	void FixedUpdate()
+	{
+		altitudeText.text = (int)((_ship.transform.position.y + 14) * UNITS_RATIO) + "m";
+		velocityText.text = (int)(_shipRigidbody.linearVelocity.magnitude * UNITS_RATIO) + "m/s";
 	}
 	
 	private void UpdateThrottle(float throttle) => throttleSlider.value = throttle;
