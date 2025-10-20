@@ -299,7 +299,7 @@ MonoBehaviour:
   rudParticles: {fileID: 1919735105832052614, guid: 60d17d41819d8aa4fb74ad67c325cb9b, type: 3}
   minTorque: 1
   maxTorque: 5
-  enginesRunning: 0
+  <EnginesRunning>k__BackingField: 0
   thrustMultiplier: 12
   gimbalThrustDivider: 1.15
   horizontalThrustDivider: 1.75
@@ -13381,8 +13381,8 @@ MonoBehaviour:
   inMax: 7.5
   outMin: 1
   outMax: 0.65
-  olm: {fileID: 0}
-  delugeDistance: 0
+  olm: {fileID: 1648930727}
+  delugeDistance: 10
 --- !u!1 &1368701183
 GameObject:
   m_ObjectHideFlags: 0
@@ -13924,7 +13924,7 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 1
+      scalar: 3
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -13977,7 +13977,7 @@ ParticleSystem:
     startSpeed:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 5
+      scalar: 2
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -14559,7 +14559,7 @@ ParticleSystem:
     sphericalDirectionAmount: 0
     randomPositionAmount: 0
     radius:
-      value: 1
+      value: 0.36
       mode: 0
       spread: 0
       speed:
@@ -16063,7 +16063,7 @@ ParticleSystem:
     y:
       serializedVersion: 2
       minMaxState: 0
-      scalar: -10
+      scalar: -2
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -16506,7 +16506,7 @@ ParticleSystem:
     strength:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 1
+      scalar: 0.5
       minScalar: 0
       maxCurve:
         serializedVersion: 2

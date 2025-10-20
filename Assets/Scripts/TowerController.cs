@@ -26,6 +26,9 @@ public class TowerController : MonoBehaviour
         float scale = MapClamp(distance, inMin, inMax, outMin, outMax);
         _chopstickParent.localScale = new(Mathf.Max(scale, _chopstickParent.localScale.x), 1);
         
+        if (_delugeEnabled && !ShipController.Instance.EnginesRunning)
+            olm.Stop();
+        
         if (distance > delugeDistance || _delugeEnabled) return;
 
         _delugeEnabled = true;

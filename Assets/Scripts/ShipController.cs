@@ -22,7 +22,7 @@ public class ShipController : Singleton<ShipController>
     [SerializeField] private float maxTorque;
     
     [Header("Thrust")]
-    [SerializeField] private bool enginesRunning;
+    [field: SerializeField] public bool EnginesRunning { get; private set; }
     [SerializeField] private float thrustMultiplier;
     [SerializeField] private float gimbalThrustDivider = 1;
     [SerializeField] private float horizontalThrustDivider = 1;
@@ -63,7 +63,7 @@ public class ShipController : Singleton<ShipController>
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space)) 
-            enginesRunning = !enginesRunning;
+            EnginesRunning = !EnginesRunning;
     }
 
     void FixedUpdate() 
@@ -87,7 +87,7 @@ public class ShipController : Singleton<ShipController>
         float input = Input.GetAxis("Horizontal");
         float thrustPercentage = Map(Throttle, 0, 1, minThrottle, 1);
         thrustPercentage = Mathf.Approximately(thrustPercentage, minThrottle) ? 0 : thrustPercentage;
-        thrustPercentage = enginesRunning ? thrustPercentage : 0;
+        thrustPercentage = EnginesRunning ? thrustPercentage : 0;
         
         float multiplier = Map(thrustPercentage, 0, 1, minTorque, maxTorque);
         _rigidbody.AddTorque(-input * multiplier);
@@ -106,7 +106,7 @@ public class ShipController : Singleton<ShipController>
     {
         Vector2 thrustForce = Vector2.zero;
 
-        if (enginesRunning) {
+        if (EnginesRunning) {
             float thrustPercentage = Map(Throttle, 0, 1, minThrottle, 1);
             float thrust = Throttle == 0 ? 0 : thrustPercentage * thrustMultiplier;
         
@@ -135,9 +135,9 @@ public class ShipController : Singleton<ShipController>
 
     private void UpdateFuel()
     {
-        float throttle = enginesRunning ? Throttle : 0;
+        float throttle = EnginesRunning ? Throttle : 0;
         Fuel = Mathf.Max(Fuel - throttle, 0);
-        if (Fuel == 0) enginesRunning = false;
+        if (Fuel == 0) EnginesRunning = false;
 
         if (Throttle == 0) return;
         OnFuelChanged?.Invoke(Fuel);
@@ -151,7 +151,7 @@ public class ShipController : Singleton<ShipController>
 
     private void UpdateEngineThrottle()
     {
-        if (Throttle == 0 || !enginesRunning)
+        if (Throttle == 0 || !EnginesRunning)
         {
             foreach (ParticleSystem engine in engines)
             {
@@ -192,7 +192,7 @@ public class ShipController : Singleton<ShipController>
 
         End:
         previousThrottle = Throttle;
-        if (!enginesRunning) previousThrottle = 0;
+        if (!EnginesRunning) previousThrottle = 0;
     }
 
     private void StopEngine(ParticleSystem engine, bool showParticles)
