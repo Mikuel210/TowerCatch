@@ -31,9 +31,9 @@ public class ShipController : Singleton<ShipController>
     [SerializeField, Range(0, 1)] private float minThrottle;
     [SerializeField] private float deltaThrottle;
     public event Action<float> OnThrottleChanged;
-    
+
     [Header("Fuel")]
-    [SerializeField] private float startingFuel;
+    [field: SerializeField] public float MaxFuel { get; private set; } = 1000;
     [field: SerializeField] public float Fuel { get; private set; }
     public event Action<float> OnFuelChanged;
 
@@ -55,7 +55,11 @@ public class ShipController : Singleton<ShipController>
     
     void Awake()
     {
-        Fuel = startingFuel;
+        var level = LevelManager.Instance.GetLevel();
+        transform.position = level.startingPosition;
+        transform.eulerAngles = new(0, 0, level.startingAngle);
+        Fuel = level.startingFuel;
+        
         _rigidbody = GetComponent<Rigidbody2D>();
         _animator = GetComponentInChildren<Animator>();
     }
@@ -78,7 +82,7 @@ public class ShipController : Singleton<ShipController>
         UpdateEngineVisuals();
     }
 
-    private void UpdateMass() => _rigidbody.mass = Map(Fuel, 0, startingFuel, dryMass, 1);
+    private void UpdateMass() => _rigidbody.mass = Map(Fuel, 0, MaxFuel, dryMass, 1);
 
     private void UpdateGravity() => _rigidbody.AddForce(Vector3.down * gravityConstant);
 

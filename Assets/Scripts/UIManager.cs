@@ -7,7 +7,6 @@ public class UIManager : MonoBehaviour {
 
 	[SerializeField] private Slider throttleSlider;
 	[SerializeField] private Slider fuelSlider;
-	[SerializeField] private float maxFuel = 1000;
 
 	[SerializeField, Space] private TextMeshProUGUI altitudeText;
 	[SerializeField] private TextMeshProUGUI velocityText;
@@ -36,6 +35,6 @@ public class UIManager : MonoBehaviour {
 	}
 	
 	private void UpdateThrottle(float throttle) => throttleSlider.value = throttle;
-	private void UpdateFuel(float fuel) => fuelSlider.value = fuel / maxFuel;
+	private void UpdateFuel(float fuel) => fuelSlider.value = fuel / ShipController.Instance.MaxFuel;
 
 }

@@ -306,7 +306,7 @@ MonoBehaviour:
   <Throttle>k__BackingField: 1
   minThrottle: 0.13
   deltaThrottle: 0.025
-  startingFuel: 500
+  <MaxFuel>k__BackingField: 1000
   <Fuel>k__BackingField: 0
   maxParticleSpeed: 17.5
   engineDispersion: 3
@@ -331,7 +331,7 @@ Transform:
   m_GameObject: {fileID: 105015150}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: -15, y: 50, z: 0}
+  m_LocalPosition: {x: -5, y: 50, z: 0}
   m_LocalScale: {x: 1, y: 4, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1043,7 +1043,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   throttleSlider: {fileID: 120319887}
   fuelSlider: {fileID: 559975466}
-  maxFuel: 1000
   altitudeText: {fileID: 1700429567}
   velocityText: {fileID: 1729328359}
 --- !u!1 &374592627
@@ -1600,7 +1599,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -15.000001, y: 46, z: -10}
+  m_LocalPosition: {x: -5, y: 46, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -13145,6 +13144,53 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &1143156826
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1143156828}
+  - component: {fileID: 1143156827}
+  m_Layer: 0
+  m_Name: LevelManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1143156827
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1143156826}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddd0074bef088b34f86f3879e453c2b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <LevelIndex>k__BackingField: 0
+  levels:
+  - {fileID: 11400000, guid: 1298c899e3c817c4ea975d156a8801e6, type: 2}
+--- !u!4 &1143156828
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1143156826}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1277283681
 GameObject:
   m_ObjectHideFlags: 0
@@ -19129,7 +19175,7 @@ Transform:
   m_GameObject: {fileID: 1797675103}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -15, y: 46, z: -10}
+  m_LocalPosition: {x: -5, y: 46, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -24285,3 +24331,4 @@ SceneRoots:
   - {fileID: 957704497}
   - {fileID: 523502025}
   - {fileID: 627005435}
+  - {fileID: 1143156828}
