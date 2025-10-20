@@ -12,7 +12,8 @@ public class UIManager : MonoBehaviour {
 	[SerializeField, Space] private TextMeshProUGUI altitudeText;
 	[SerializeField] private TextMeshProUGUI velocityText;
 	
-	[SerializeField, Space] private GameObject winPanel;
+	[SerializeField, Space] private GameObject winText;
+	[SerializeField, Space] private GameObject restartText;
 
 	private ShipController _ship;
 	private Rigidbody2D _shipRigidbody;
@@ -28,7 +29,8 @@ public class UIManager : MonoBehaviour {
 		UpdateThrottle(ShipController.Instance.Throttle);
 		UpdateFuel(ShipController.Instance.Fuel);
 
-		CatchPin.Instance.OnCatch += () => winPanel.SetActive(true);
+		CatchPin.Instance.OnCatch += () => winText.SetActive(true);
+		_ship.OnRud += () => restartText.SetActive(true);
 	}
 
 	private const float UNITS_RATIO = 13;
@@ -41,7 +43,5 @@ public class UIManager : MonoBehaviour {
 	
 	private void UpdateThrottle(float throttle) => throttleSlider.value = throttle;
 	private void UpdateFuel(float fuel) => fuelSlider.value = fuel / maxFuel;
-
-	public void NextLevel() => LevelManager.Instance.NextLevel();
 
 }

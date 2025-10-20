@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -16,6 +17,7 @@ public class ShipController : Singleton<ShipController>
     
     [SerializeField, Space] private float rudForce;
     [SerializeField] private ParticleSystem rudParticles;
+    [CanBeNull] public event Action OnRud;
     
     [Header("Rotation")]
     [SerializeField] private float minTorque;
@@ -255,6 +257,9 @@ public class ShipController : Singleton<ShipController>
         // Engine graphics
         foreach (var graphic in engineGraphics)
             graphic.gameObject.SetActive(false);
+        
+        // Invoke event
+        OnRud?.Invoke();
         
         // Disable ship
         gameObject.SetActive(false);
