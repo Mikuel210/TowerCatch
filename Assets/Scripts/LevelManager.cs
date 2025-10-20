@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LevelManager : Singleton<LevelManager>
 {
 
     private static LevelManager _instance;
-    
-    [field: SerializeField] public int LevelIndex { get; private set; }
+
+    private static int LevelIndex { get; set; }
     [SerializeField] private List<LevelSO> levels;
     
     void Awake()
@@ -21,5 +22,12 @@ public class LevelManager : Singleton<LevelManager>
     }
 
     public LevelSO GetLevel() => levels[LevelIndex];
+    public void NextLevel()
+    {
+        LevelIndex++;
+
+        int sceneIndex = SceneManager.GetActiveScene().buildIndex;
+        SceneManager.LoadScene(sceneIndex);
+    }
 
 }

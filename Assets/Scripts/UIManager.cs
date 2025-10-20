@@ -7,9 +7,12 @@ public class UIManager : MonoBehaviour {
 
 	[SerializeField] private Slider throttleSlider;
 	[SerializeField] private Slider fuelSlider;
+	[SerializeField] private float maxFuel = 1000;
 
 	[SerializeField, Space] private TextMeshProUGUI altitudeText;
 	[SerializeField] private TextMeshProUGUI velocityText;
+	
+	[SerializeField, Space] private GameObject winPanel;
 
 	private ShipController _ship;
 	private Rigidbody2D _shipRigidbody;
@@ -24,6 +27,8 @@ public class UIManager : MonoBehaviour {
 		
 		UpdateThrottle(ShipController.Instance.Throttle);
 		UpdateFuel(ShipController.Instance.Fuel);
+
+		CatchPin.Instance.OnCatch += () => winPanel.SetActive(true);
 	}
 
 	private const float UNITS_RATIO = 13;
@@ -35,6 +40,8 @@ public class UIManager : MonoBehaviour {
 	}
 	
 	private void UpdateThrottle(float throttle) => throttleSlider.value = throttle;
-	private void UpdateFuel(float fuel) => fuelSlider.value = fuel / ShipController.Instance.MaxFuel;
+	private void UpdateFuel(float fuel) => fuelSlider.value = fuel / maxFuel;
+
+	public void NextLevel() => LevelManager.Instance.NextLevel();
 
 }
