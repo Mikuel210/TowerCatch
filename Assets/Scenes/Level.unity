@@ -13470,10 +13470,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddd0074bef088b34f86f3879e453c2b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startingLevelIndex: 7
   levels:
   - {fileID: 11400000, guid: 1298c899e3c817c4ea975d156a8801e6, type: 2}
+  - {fileID: 11400000, guid: a06402b4bdc142346a3878e6a9fc5705, type: 2}
   - {fileID: 11400000, guid: dd846d778ed1c834db7ce40beb0e2a6c, type: 2}
+  - {fileID: 11400000, guid: abaea82c9e8bf0a418b20dc072d25bcf, type: 2}
   - {fileID: 11400000, guid: 0ed9fbd9053cb1a47ab15352d0f670dd, type: 2}
+  - {fileID: 11400000, guid: 18fa5e2f66541254a917efd3d948aa5e, type: 2}
+  - {fileID: 11400000, guid: 918764b74f832fe4182c1e3533688dc0, type: 2}
+  - {fileID: 11400000, guid: bb0b7be7493f2cd47afad0928141d239, type: 2}
+  - {fileID: 11400000, guid: 1665fe817dd174b4293d2b23ecc563a3, type: 2}
 --- !u!4 &1143156828
 Transform:
   m_ObjectHideFlags: 0

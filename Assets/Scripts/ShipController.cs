@@ -55,7 +55,7 @@ public class ShipController : Singleton<ShipController>
     private float previousThrottle = 1;
     private float _startingFuel;
     
-    void Awake()
+    void Start()
     {
         var level = LevelManager.Instance.GetLevel();
         transform.position = level.startingPosition;

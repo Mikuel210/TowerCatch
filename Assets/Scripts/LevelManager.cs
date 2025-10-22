@@ -7,6 +7,7 @@ public class LevelManager : Singleton<LevelManager>
 
     private static LevelManager _instance;
 
+    [SerializeField] private int startingLevelIndex;
     private static int LevelIndex { get; set; }
     [SerializeField] private List<LevelSO> levels;
     
@@ -19,6 +20,8 @@ public class LevelManager : Singleton<LevelManager>
         
         _instance = this;
         DontDestroyOnLoad(gameObject);
+
+        LevelIndex = startingLevelIndex;
     }
 
     public LevelSO GetLevel() => levels[LevelIndex];
