@@ -707,8 +707,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 220853986}
-  - component: {fileID: 220853985}
   - component: {fileID: 220853987}
+  - component: {fileID: 220853985}
   m_Layer: 0
   m_Name: Music Player
   m_TagString: Untagged
@@ -726,9 +726,9 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: dbb6a63e9e716014cb0cb58fb1080a73, type: 3}
+  m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: dbb6a63e9e716014cb0cb58fb1080a73, type: 3}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -840,6 +840,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fd7ef7b73695f6418c7327497a0c3d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  songs:
+  - {fileID: 8300000, guid: 3f84cb421affaf84083008669bbae09b, type: 3}
+  - {fileID: 8300000, guid: 85e491c812957644194e9af55ada0015, type: 3}
+  - {fileID: 8300000, guid: c8232c800b2982348ae8fb19da4cfd96, type: 3}
+  - {fileID: 8300000, guid: 424795912e1a78246aff06a547bf0105, type: 3}
+  - {fileID: 8300000, guid: ff0480a50a9641044aa0afd4cfaeebe0, type: 3}
+  - {fileID: 8300000, guid: 6ad28b3f2f6c19e4d802bc12d4e5f744, type: 3}
 --- !u!1 &333640238
 GameObject:
   m_ObjectHideFlags: 0
