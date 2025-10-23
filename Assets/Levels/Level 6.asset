@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c80bb7d92b5e41ccbf33556e2f7b00f8, type: 3}
-  m_Name: Level 4.5
+  m_Name: Level 6
   m_EditorClassIdentifier: 
-  startingPosition: {x: -5, y: 40}
-  startingAngle: 90
-  startingFuel: 150
+  startingPosition: {x: 9, y: 20}
+  startingAngle: 180
+  startingFuel: 175

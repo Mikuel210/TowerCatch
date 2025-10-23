@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c80bb7d92b5e41ccbf33556e2f7b00f8, type: 3}
   m_Name: Level 5
   m_EditorClassIdentifier: 
-  startingPosition: {x: 0, y: 70}
-  startingAngle: 0
-  startingFuel: 300
+  startingPosition: {x: 30, y: 40}
+  startingAngle: 90
+  startingFuel: 100

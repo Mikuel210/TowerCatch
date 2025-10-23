@@ -7,5 +7,5 @@ public class LevelSO : ScriptableObject
 	public Vector2 startingPosition;
 	public float startingAngle;
 	public float startingFuel;
-
+	
 }

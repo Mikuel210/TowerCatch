@@ -13,7 +13,8 @@ public class UIManager : MonoBehaviour {
 	[SerializeField] private TextMeshProUGUI velocityText;
 	
 	[SerializeField, Space] private GameObject winText;
-	[SerializeField, Space] private GameObject restartText;
+	[SerializeField] private GameObject restartText;
+	[SerializeField] private GameObject winPanel;
 
 	private ShipController _ship;
 	private Rigidbody2D _shipRigidbody;
@@ -29,7 +30,10 @@ public class UIManager : MonoBehaviour {
 		UpdateThrottle(ShipController.Instance.Throttle);
 		UpdateFuel(ShipController.Instance.Fuel);
 
-		CatchPin.Instance.OnCatch += () => winText.SetActive(true);
+		CatchPin.Instance.OnCatch += () => {
+			if (LevelManager.LevelIndex < LevelManager.LevelCount - 1) winText.SetActive(true);
+			else winPanel.SetActive(true);
+		};
 		_ship.OnRud += () => restartText.SetActive(true);
 	}
 
